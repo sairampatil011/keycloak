@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide: Integrating Keycloak with Spring Boot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Slate/Gray neutrals, Blue accent) -->
+    <!-- Application Structure Plan: A multi-section SPA with top navigation for non-linear exploration. Key sections cover core concepts, Keycloak setup, Spring Boot config, and testing. This structure breaks down a complex technical process into manageable, thematic parts, which is more user-friendly than a single long document. Interactive elements like a clickable flow diagram, accordions for steps, and tabs for code will enhance engagement and understanding. -->
+    <!-- Visualization & Content Choices: Report Info: Authorization Code Flow -> Goal: Explain a process -> Viz/Presentation: Interactive HTML/JS diagram -> Interaction: Click steps to see details -> Justification: More engaging and clearer than static text/image. Report Info: Code snippets -> Goal: Organize related code -> Viz/Presentation: Tabbed interface -> Interaction: Click tabs to switch files -> Justification: Saves space and groups related context. Report Info: Troubleshooting steps -> Goal: Provide quick solutions -> Viz/Presentation: Interactive accordion/modal -> Interaction: Click error to see solution -> Justification: Faster access to relevant info. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease-in-out;
+        }
+        .nav-link {
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .code-block {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+        }
+        .flow-step {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .flow-step.active {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.4), 0 4px 6px -4px rgb(59 130 246 / 0.4);
+            border-color: #3b82f6; /* blue-500 */
+        }
+        .flow-arrow {
+            position: relative;
+            width: 100%;
+            height: 2px;
+            background-color: #94a3b8; /* slate-400 */
+        }
+        .flow-arrow::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: -4px;
+            border: solid #94a3b8; /* slate-400 */
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            padding: 4px;
+            transform: rotate(-45deg);
+        }
+        .tab-button.active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-700">
+
+<!-- Header and Navigation -->
+<header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex-shrink-0">
+                <h1 class="text-xl font-bold text-slate-800">Keycloak Integration Guide</h1>
+            </div>
+            <nav class="hidden md:flex md:space-x-8">
+                <a href="#concepts" class="nav-link text-slate-500 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 py-2">Concepts</a>
+                <a href="#setup" class="nav-link text-slate-500 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 py-2">Keycloak Setup</a>
+                <a href="#config" class="nav-link text-slate-500 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 py-2">Spring Boot Config</a>
+                <a href="#troubleshooting" class="nav-link text-slate-500 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 py-2">Testing & Troubleshooting</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+    <!-- Section 1: Core Concepts -->
+    <section id="concepts" class="mb-16 scroll-mt-24">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Core Concepts</h2>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Understand the fundamental principles of Keycloak and OAuth 2.0 before diving into the implementation. A solid foundation is key to a secure system.</p>
+        </div>
+
+        <div class="space-y-12">
+            <!-- Client Types -->
+            <div class="section-card p-6 md:p-8">
+                <h3 class="text-2xl font-semibold text-slate-800 mb-4">Client Types: Confidential vs. Public</h3>
+                <p class="text-slate-600 mb-6">In OAuth 2.0, a "Client" is any application that requests tokens from Keycloak. The type of client you choose has critical security implications.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="border border-slate-200 rounded-lg p-6">
+                        <h4 class="font-bold text-lg text-slate-900 flex items-center">
+                            <span class="text-2xl mr-3">🛡️</span> Confidential
+                        </h4>
+                        <p class="mt-2 text-slate-600">These are clients that can securely store a secret. Our backend Spring Boot services are perfect examples, as the secret is never exposed to the outside world.</p>
+                        <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Runs on a secure, trusted server.</span></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Authenticates itself with a Client ID and Client Secret.</span></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Enables the most secure authentication flows.</span></li>
+                        </ul>
+                    </div>
+                    <div class="border border-slate-200 rounded-lg p-6">
+                        <h4 class="font-bold text-lg text-slate-900 flex items-center">
+                            <span class="text-2xl mr-3">🌐</span> Public
+                        </h4>
+                        <p class="mt-2 text-slate-600">Clients that cannot keep a secret safe, like browser-based Single-Page Apps (SPAs) or mobile apps. The secret could be easily extracted from the code.</p>
+                        <ul class="mt-4 space-y-2 text-sm">
+                            <li class="flex items-start"><span class="text-red-500 mr-2 mt-1">✗</span><span>Cannot be trusted with a secret.</span></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>Authenticates using flows designed for public clients, like Authorization Code Flow with PKCE.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auth Flow -->
+            <div class="section-card p-6 md:p-8">
+                <h3 class="text-2xl font-semibold text-slate-800 mb-2">The Authorization Code Flow</h3>
+                <p class="text-slate-600 mb-6">This is the most secure and recommended flow for our applications. It ensures user credentials and tokens are never exposed to the browser. Click on each step to see details.</p>
+                <div id="flow-diagram" class="space-y-4">
+                    <div class="grid md:grid-cols-4 gap-4 items-center text-center">
+                        <div id="flow-step-1" class="flow-step border-2 border-slate-300 rounded-lg p-4 h-full flex flex-col justify-center">
+                            <div class="text-4xl">👤</div>
+                            <h5 class="font-semibold mt-2">1. User Action</h5>
+                        </div>
+                        <div class="hidden md:block flow-arrow"></div>
+                        <div id="flow-step-2" class="flow-step border-2 border-slate-300 rounded-lg p-4 h-full flex flex-col justify-center">
+                            <div class="text-4xl">🔐</div>
+                            <h5 class="font-semibold mt-2">2. Redirect to Keycloak</h5>
+                        </div>
+                        <div class="hidden md:block flow-arrow"></div>
+                    </div>
+                    <div class="grid md:grid-cols-4 gap-4 items-center text-center md:flex-row-reverse">
+                        <div id="flow-step-4" class="flow-step border-2 border-slate-300 rounded-lg p-4 h-full flex flex-col justify-center">
+                            <div class="text-4xl">🔄</div>
+                            <h5 class="font-semibold mt-2">4. Code for Tokens</h5>
+                        </div>
+                        <div class="hidden md:block flow-arrow transform rotate-180"></div>
+                        <div id="flow-step-3" class="flow-step border-2 border-slate-300 rounded-lg p-4 h-full flex flex-col justify-center">
+                            <div class="text-4xl">🔑</div>
+                            <h5 class="font-semibold mt-2">3. Login & Get Code</h5>
+                        </div>
+                        <div class="hidden md:block flow-arrow"></div>
+                    </div>
+                    <div class="grid md:grid-cols-4 gap-4 items-center text-center">
+                        <div id="flow-step-5" class="flow-step border-2 border-slate-300 rounded-lg p-4 h-full flex flex-col justify-center">
+                            <div class="text-4xl">📜</div>
+                            <h5 class="font-semibold mt-2">5. Use Access Token</h5>
+                        </div>
+                        <div class="hidden md:block flow-arrow"></div>
+                        <div id="flow-step-6" class="flow-step border-2 border-slate-300 rounded-lg p-4 h-full flex flex-col justify-center">
+                            <div class="text-4xl">✅</div>
+                            <h5 class="font-semibold mt-2">6. Access Granted</h5>
+                        </div>
+                    </div>
+                </div>
+                <div id="flow-explanation" class="mt-6 p-4 bg-slate-100 rounded-lg text-slate-700 min-h-[80px]">
+                    Select a step above to learn more.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Keycloak Setup -->
+    <section id="setup" class="mb-16 scroll-mt-24">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Keycloak Admin Console Setup</h2>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Follow this step-by-step guide to configure a new client in Keycloak. Each step is crucial for a secure setup.</p>
+        </div>
+        <div class="section-card p-6 md:p-8">
+            <div id="accordion-container" class="space-y-4">
+                <!-- Accordion Item 1 -->
+                <div class="accordion-item border border-slate-200 rounded-lg">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-4 font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                        <span>Step 1: Create a New Realm</span>
+                        <span class="accordion-icon transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-slate-200">
+                            <p class="text-slate-600">A Realm is an isolated space for your users, roles, and clients. Never use the default `master` realm for applications.</p>
+                            <ol class="list-decimal list-inside mt-4 space-y-2">
+                                <li>Log in to the Keycloak Admin Console.</li>
+                                <li>Hover over the realm name in the top-left and click <strong>Create Realm</strong>.</li>
+                                <li>Enter a <strong>Realm name</strong> (e.g., `wowcare_qa`).</li>
+                                <li>Click <strong>Create</strong>. You will now operate within this new realm.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- Accordion Item 2 -->
+                <div class="accordion-item border border-slate-200 rounded-lg">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-4 font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                        <span>Step 2: Create and Configure the Client</span>
+                        <span class="accordion-icon transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-slate-200 space-y-4">
+                            <p class="text-slate-600">Register your microservice as a client. This configuration defines how it communicates with Keycloak.</p>
+                            <h5 class="font-semibold">General Settings:</h5>
+                            <ul class="list-disc list-inside">
+                                <li><strong>Client ID:</strong> `wowcare-school-ms-client` (must match your application config).</li>
+                                <li><strong>Name:</strong> A human-readable name like "WowCare School Microservice".</li>
+                            </ul>
+                            <h5 class="font-semibold">Capability Config:</h5>
+                            <ul class="list-disc list-inside">
+                                <li><strong>Client authentication:</strong> Set to <strong class="text-green-600">ON</strong>. This is what makes it a confidential client.</li>
+                                <li><strong>Authentication flow:</strong> Ensure `Standard flow` and `Direct access grants` are checked.</li>
+                            </ul>
+                            <h5 class="font-semibold">Login Settings (add all relevant URLs):</h5>
+                            <ul class="list-disc list-inside">
+                                <li><strong>Valid Redirect URIs:</strong>
+                                    <div class="code-block text-sm mt-2">http://localhost:8080/wowcare-school-ms/swagger-ui/oauth2-redirect.html<br>https://wow.atoconn.com/wowcare-school-ms/swagger-ui/oauth2-redirect.html<br>http://localhost:8080/*</div>
+                                </li>
+                                <li><strong>Web Origins:</strong>
+                                    <div class="code-block text-sm mt-2">http://localhost:8080<br>https://wow.atoconn.com</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Accordion Item 3 -->
+                <div class="accordion-item border border-slate-200 rounded-lg">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-4 font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                        <span>Step 3: Retrieve the Client Secret</span>
+                        <span class="accordion-icon transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-slate-200">
+                            <p class="text-slate-600">After saving the client, a `Credentials` tab will appear. The client secret is a password for your application. Store it securely and never commit it to source control.</p>
+                            <ol class="list-decimal list-inside mt-4 space-y-2">
+                                <li>Navigate to the <strong>Clients</strong> list and select your new client.</li>
+                                <li>Click the <strong>Credentials</strong> tab.</li>
+                                <li>Copy the value from the <strong>Client secret</strong> field. You will need this for your `application.yml`.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Spring Boot Config -->
+    <section id="config" class="mb-16 scroll-mt-24">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Spring Boot Configuration</h2>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Integrate Keycloak with your Spring Boot application using modern, standards-based Spring Security modules.</p>
+        </div>
+        <div class="section-card p-6 md:p-8">
+            <div class="mb-6 border-b border-slate-200">
+                <nav id="code-tabs" class="-mb-px flex space-x-6" aria-label="Tabs">
+                    <button data-tab="pom" class="tab-button active whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">pom.xml</button>
+                    <button data-tab="yml" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300">application.yml</button>
+                    <button data-tab="security" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300">SecurityConfig.java</button>
+                    <button data-tab="converter" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300">JwtAuthConverter.java</button>
+                </nav>
+            </div>
+            <div id="code-content">
+                <div data-content="pom" class="tab-content">
+                    <p class="text-slate-600 mb-4">Add the required dependencies for Spring Security and OAuth 2.0 Resource Server support. The legacy Keycloak adapter is not needed.</p>
+                    <pre class="code-block"><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-oauth2-resource-server&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+                </div>
+                <div data-content="yml" class="tab-content hidden">
+                    <p class="text-slate-600 mb-4">Configure the connection to your Keycloak realm. The `issuer-uri` is critical for validating tokens.</p>
+                    <pre class="code-block"><code>spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.childcarewow.app/realms/wowcare_qa
+          jwk-set-uri: https://login.childcarewow.app/realms/wowcare_qa/protocol/openid-connect/certs</code></pre>
+                </div>
+                <div data-content="security" class="tab-content hidden">
+                    <p class="text-slate-600 mb-4">Define the security filter chain. This configures your app as a stateless resource server and plugs in the custom JWT converter.</p>
+                    <pre class="code-block"><code>@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
+        return http.build();
+    }
+    // ... converter bean
+}</code></pre>
+                </div>
+                <div data-content="converter" class="tab-content hidden">
+                    <p class="text-slate-600 mb-4">This converter is essential. It maps Keycloak's role structure from the JWT into authorities that Spring Security can understand, enabling role-based access control.</p>
+                    <pre class="code-block"><code>public class JwtAuthConverter implements Converter&lt;Jwt, Collection&lt;GrantedAuthority&gt;&gt; {
+    @Override
+    public Collection&lt;GrantedAuthority&gt; convert(Jwt jwt) {
+        Map&lt;String, Object&gt; realmAccess = jwt.getClaim("realm_access");
+        if (realmAccess == null || realmAccess.isEmpty()) {
+            return new ArrayList&lt;&gt;();
+        }
+        Collection&lt;String&gt; roles = (Collection&lt;String&gt;) realmAccess.get("roles");
+        return roles.stream()
+                .map(roleName -> "ROLE_" + roleName)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Testing & Troubleshooting -->
+    <section id="troubleshooting" class="scroll-mt-24">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Testing & Troubleshooting</h2>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Verify your setup and learn how to solve common issues like authorization errors and CORS problems.</p>
+        </div>
+        <div class="section-card p-6 md:p-8">
+            <div id="accordion-container-2" class="space-y-4">
+                <!-- Accordion Item 1 -->
+                <div class="accordion-item border border-slate-200 rounded-lg">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-4 font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                        <span>How to Test with Postman/curl</span>
+                        <span class="accordion-icon transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-slate-200 space-y-4">
+                            <p class="text-slate-600">First, get an access token from Keycloak using the Direct Access Grant (password) flow. Then, use that token as a Bearer token to call your API.</p>
+                            <h5 class="font-semibold">1. Get Token</h5>
+                            <pre class="code-block"><code>curl -X POST \\
+  https://login.childcarewow.app/realms/wowcare_qa/protocol/openid-connect/token \\
+  -H 'Content-Type: application/x-www-form-urlencoded' \\
+  -d 'grant_type=password' \\
+  -d 'client_id=wowcare-school-ms-client' \\
+  -d 'client_secret=YOUR_CLIENT_SECRET' \\
+  -d 'username=YOUR_USERNAME' \\
+  -d 'password=YOUR_PASSWORD'</code></pre>
+                            <h5 class="font-semibold">2. Call API</h5>
+                            <pre class="code-block"><code>curl -X GET \\
+  https://wow.atoconn.com/wowcare-school-ms/api/v1/school/emails \\
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <!-- Accordion Item 2 -->
+                <div class="accordion-item border border-slate-200 rounded-lg">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-4 font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                        <span>Troubleshooting: Swagger UI Auth Error</span>
+                        <span class="accordion-icon transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-slate-200">
+                            <p class="text-slate-600"><strong class="text-red-600">Problem:</strong> Clicking "Authorize" in Swagger UI results in a "Valid redirect_uri not configured for client" error from Keycloak.</p>
+                            <p class="mt-2 text-slate-600"><strong class="text-green-600">Solution:</strong> Swagger's OAuth2 flow requires its specific redirect URL to be whitelisted in Keycloak. You must add the exact URL to your client's "Valid Redirect URIs" list.</p>
+                            <div class="code-block text-sm mt-4">http://localhost:8080/wowcare-school-ms/swagger-ui/oauth2-redirect.html</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Accordion Item 3 -->
+                <div class="accordion-item border border-slate-200 rounded-lg">
+                    <button class="accordion-button w-full flex justify-between items-center text-left p-4 font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-t-lg">
+                        <span>Troubleshooting: 403 Forbidden Error</span>
+                        <span class="accordion-icon transform transition-transform">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 border-t border-slate-200">
+                            <p class="text-slate-600"><strong class="text-red-600">Problem:</strong> You are authenticated, but API calls to protected endpoints fail with a 403 error.</p>
+                            <p class="mt-2 text-slate-600"><strong class="text-green-600">Solution:</strong> This means your token is valid, but it doesn't contain the roles your API requires (`@PreAuthorize("hasRole('ADMIN')")`).</p>
+                            <ul class="list-disc list-inside mt-4 space-y-2">
+                                <li>Verify your `JwtAuthConverter` is correctly implemented and registered.</li>
+                                <li>Check that the user you are logging in with has the correct roles assigned in Keycloak.</li>
+                                <li>Decode your JWT (e.g., on jwt.io) and inspect the `realm_access` or `resource_access` claims to see what roles are actually present.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Navigation
+        const navLinks = document.querySelectorAll('a[href^="#"]');
+        navLinks.forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Flow Diagram
+        const flowSteps = document.querySelectorAll('.flow-step');
+        const flowExplanation = document.getElementById('flow-explanation');
+        const explanations = {
+            'flow-step-1': 'A user tries to access a protected page or API in your frontend application.',
+            'flow-step-2': 'The application, seeing the user is not authenticated, redirects them to the Keycloak login page.',
+            'flow-step-3': 'The user securely enters their credentials directly into Keycloak. Your app never sees the password. Keycloak sends back a temporary, one-time-use authorization code.',
+            'flow-step-4': 'In a secure, server-to-server call (back-channel), your Spring Boot backend exchanges the authorization code and its client secret for tokens.',
+            'flow-step-5': 'The frontend now makes API calls to the backend, including the Access Token in the `Authorization: Bearer` header.',
+            'flow-step-6': 'The backend validates the token\'s signature and claims. If valid, the user is authorized, and the API returns the requested data.'
+        };
+
+        flowSteps.forEach(step => {
+            step.addEventListener('click', () => {
+                flowSteps.forEach(s => s.classList.remove('active'));
+                step.classList.add('active');
+                flowExplanation.textContent = explanations[step.id];
+            });
+        });
+
+        // Code Tabs
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+
+                const tabName = button.dataset.tab;
+                tabContents.forEach(content => {
+                    if (content.dataset.content === tabName) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Accordions
+        const accordionButtons = document.querySelectorAll('.accordion-button');
+        accordionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('.accordion-icon');
+
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    // Close other accordions in the same container
+                    const container = button.closest('.space-y-4');
+                    if (container) {
+                        container.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                        container.querySelectorAll('.accordion-icon').forEach(i => i.style.transform = 'rotate(0deg)');
+                    }
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
