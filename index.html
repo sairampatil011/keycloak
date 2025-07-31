@@ -224,10 +224,10 @@
                             <h5 class="font-semibold">Login Settings (add all relevant URLs):</h5>
                             <ul class="list-disc list-inside">
                                 <li><strong>Valid Redirect URIs:</strong>
-                                    <div class="code-block text-sm mt-2">http://localhost:8080/{project_name}/swagger-ui/oauth2-redirect.html<br>https://wow.atoconn.com/{project_name}/swagger-ui/oauth2-redirect.html<br>http://localhost:8080/*</div>
+                                    <div class="code-block text-sm mt-2">http://localhost:8080/{project_name}/swagger-ui/oauth2-redirect.html<br>https://atoconn.com/{project_name}/swagger-ui/oauth2-redirect.html<br>http://localhost:8080/*</div>
                                 </li>
                                 <li><strong>Web Origins:</strong>
-                                    <div class="code-block text-sm mt-2">http://localhost:8080<br>https://wow.atoconn.com</div>
+                                    <div class="code-block text-sm mt-2">http://localhost:8080<br>https://atoconn.com</div>
                                 </li>
                             </ul>
                         </div>
@@ -373,7 +373,7 @@ public class SecurityConfig {
   -d 'password=YOUR_PASSWORD'</code></pre>
                             <h5 class="font-semibold">2. Call API</h5>
                             <pre class="code-block"><code>curl -X GET \\
-  https://wow.atoconn.com/{project_name}/api/v1/school/emails \\
+  https://atoconn.com/{project_name}/api/v1/school/emails \\
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'</code></pre>
                         </div>
                     </div>
