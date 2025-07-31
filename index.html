@@ -1,17 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atoconn</title>
+    <title>Atoconn Docs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Harmony (Slate/Gray neutrals, Blue accent) -->
-    <!-- Application Structure Plan: A multi-section SPA with top navigation for non-linear exploration. Key sections cover core concepts, Keycloak setup, Spring Boot config, and testing. This structure breaks down a complex technical process into manageable, thematic parts, which is more user-friendly than a single long document. Interactive elements like a clickable flow diagram, accordions for steps, and tabs for code will enhance engagement and understanding. -->
     <!-- Visualization & Content Choices: Report Info: Authorization Code Flow -> Goal: Explain a process -> Viz/Presentation: Interactive HTML/JS diagram -> Interaction: Click steps to see details -> Justification: More engaging and clearer than static text/image. Report Info: Code snippets -> Goal: Organize related code -> Viz/Presentation: Tabbed interface -> Interaction: Click tabs to switch files -> Justification: Saves space and groups related context. Report Info: Troubleshooting steps -> Goal: Provide quick solutions -> Viz/Presentation: Interactive accordion/modal -> Interaction: Click error to see solution -> Justification: Faster access to relevant info. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -199,7 +197,7 @@
                             <ol class="list-decimal list-inside mt-4 space-y-2">
                                 <li>Log in to the Keycloak Admin Console.</li>
                                 <li>Hover over the realm name in the top-left and click <strong>Create Realm</strong>.</li>
-                                <li>Enter a <strong>Realm name</strong> (e.g., `wowcare_qa`).</li>
+                                <li>Enter a <strong>Realm name</strong> (e.g., `atoconn_qa`).</li>
                                 <li>Click <strong>Create</strong>. You will now operate within this new realm.</li>
                             </ol>
                         </div>
@@ -216,8 +214,7 @@
                             <p class="text-slate-600">Register your microservice as a client. This configuration defines how it communicates with Keycloak.</p>
                             <h5 class="font-semibold">General Settings:</h5>
                             <ul class="list-disc list-inside">
-                                <li><strong>Client ID:</strong> `wowcare-school-ms-client` (must match your application config).</li>
-                                <li><strong>Name:</strong> A human-readable name like "WowCare School Microservice".</li>
+                                <li><strong>Client ID:</strong> `atoconn-{project_name}-client` (must match your application config).</li>
                             </ul>
                             <h5 class="font-semibold">Capability Config:</h5>
                             <ul class="list-disc list-inside">
@@ -227,7 +224,7 @@
                             <h5 class="font-semibold">Login Settings (add all relevant URLs):</h5>
                             <ul class="list-disc list-inside">
                                 <li><strong>Valid Redirect URIs:</strong>
-                                    <div class="code-block text-sm mt-2">http://localhost:8080/wowcare-school-ms/swagger-ui/oauth2-redirect.html<br>https://wow.atoconn.com/wowcare-school-ms/swagger-ui/oauth2-redirect.html<br>http://localhost:8080/*</div>
+                                    <div class="code-block text-sm mt-2">http://localhost:8080/{project_name}/swagger-ui/oauth2-redirect.html<br>https://wow.atoconn.com/{project_name}/swagger-ui/oauth2-redirect.html<br>http://localhost:8080/*</div>
                                 </li>
                                 <li><strong>Web Origins:</strong>
                                     <div class="code-block text-sm mt-2">http://localhost:8080<br>https://wow.atoconn.com</div>
@@ -291,8 +288,16 @@
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://login.childcarewow.app/realms/wowcare_qa
-          jwk-set-uri: https://login.childcarewow.app/realms/wowcare_qa/protocol/openid-connect/certs</code></pre>
+          issuer-uri: https://login.atoconn.app/realms/atoconn_qa
+          jwk-set-uri: https://login.atoconn.app/realms/atoconn_qa/protocol/openid-connect/certs
+
+  keycloak:
+    auth-server-url: https://login.atoconn.app
+    realm: atoconn_qa
+    resource: {Your client Name} (Eg. atoconn-school-client)
+    credentials:
+      secret: {Your client secret} //If the client is confidential esle remove this.
+    bearer-only: true</code></pre>
                 </div>
                 <div data-content="security" class="tab-content hidden">
                     <p class="text-slate-600 mb-4">Define the security filter chain. This configures your app as a stateless resource server and plugs in the custom JWT converter.</p>
@@ -359,16 +364,16 @@ public class SecurityConfig {
                             <p class="text-slate-600">First, get an access token from Keycloak using the Direct Access Grant (password) flow. Then, use that token as a Bearer token to call your API.</p>
                             <h5 class="font-semibold">1. Get Token</h5>
                             <pre class="code-block"><code>curl -X POST \\
-  https://login.childcarewow.app/realms/wowcare_qa/protocol/openid-connect/token \\
+  https://login.atoconn.app/realms/atoconn_qa/protocol/openid-connect/token \\
   -H 'Content-Type: application/x-www-form-urlencoded' \\
   -d 'grant_type=password' \\
-  -d 'client_id=wowcare-school-ms-client' \\
+  -d 'client_id={project_name}-client' \\
   -d 'client_secret=YOUR_CLIENT_SECRET' \\
   -d 'username=YOUR_USERNAME' \\
   -d 'password=YOUR_PASSWORD'</code></pre>
                             <h5 class="font-semibold">2. Call API</h5>
                             <pre class="code-block"><code>curl -X GET \\
-  https://wow.atoconn.com/wowcare-school-ms/api/v1/school/emails \\
+  https://wow.atoconn.com/{project_name}/api/v1/school/emails \\
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'</code></pre>
                         </div>
                     </div>
@@ -383,7 +388,7 @@ public class SecurityConfig {
                         <div class="p-4 border-t border-slate-200">
                             <p class="text-slate-600"><strong class="text-red-600">Problem:</strong> Clicking "Authorize" in Swagger UI results in a "Valid redirect_uri not configured for client" error from Keycloak.</p>
                             <p class="mt-2 text-slate-600"><strong class="text-green-600">Solution:</strong> Swagger's OAuth2 flow requires its specific redirect URL to be whitelisted in Keycloak. You must add the exact URL to your client's "Valid Redirect URIs" list.</p>
-                            <div class="code-block text-sm mt-4">http://localhost:8080/wowcare-school-ms/swagger-ui/oauth2-redirect.html</div>
+                            <div class="code-block text-sm mt-4">http://localhost:8080/{project_name}/swagger-ui/oauth2-redirect.html</div>
                         </div>
                     </div>
                 </div>
