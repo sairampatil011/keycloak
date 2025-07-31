@@ -1,1 +1,1 @@
-# keycloak
+# Interactive Keycloak integration guide
